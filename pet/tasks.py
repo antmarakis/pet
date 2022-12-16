@@ -120,6 +120,39 @@ class DataProcessor(ABC):
         pass
 
 
+class XtremeProcessor(DataProcessor):
+
+    def get_train_examples(self, data_dir):
+        return self._create_examples(os.path.join(data_dir, "train.csv"), "train")
+
+    def get_dev_examples(self, data_dir):
+        return self._create_examples(os.path.join(data_dir, "dev.csv"), "dev")
+
+    def get_test_examples(self, data_dir) -> List[InputExample]:
+        raise self._create_examples(os.path.join(data_dir, "test.csv"), "dev")
+
+    def get_unlabeled_examples(self, data_dir) -> List[InputExample]:
+        return self.get_train_examples(data_dir)
+
+    def get_labels(self):
+        return ["0", "1"]
+
+    @staticmethod
+    def _create_examples(path: str, set_type: str) -> List[InputExample]:
+        examples = []
+
+        with open(path) as f:
+            reader = csv.reader(f, delimiter=',')
+            for idx, row in enumerate(reader):
+                label, body = row
+                guid = "%s-%s" % (set_type, idx)
+                text_a = body.replace('\\n', ' ').replace('\\', ' ')
+
+                example = InputExample(guid=guid, text_a=text_a, label=label)
+                examples.append(example)
+
+        return examples
+
 class MnliProcessor(DataProcessor):
     """Processor for the MultiNLI data set (GLUE version)."""
 
@@ -782,6 +815,7 @@ PROCESSORS = {
     "record": RecordProcessor,
     "ax-g": AxGProcessor,
     "ax-b": AxBProcessor,
+    'xtreme': XtremeProcessor,
 }  # type: Dict[str,Callable[[],DataProcessor]]
 
 TASK_HELPERS = {

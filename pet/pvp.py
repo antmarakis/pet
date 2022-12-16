@@ -256,6 +256,25 @@ class PVP(ABC):
 
         return verbalize
 
+class XtremePVP(PVP):
+    VERBALIZER = {
+        "0": ["acceptable"],
+        "1": ["unacceptable"]
+    }
+
+    def get_parts(self, example: InputExample) -> FilledPattern:
+
+        text = self.shortenable(example.text_a)
+
+        if self.pattern_id == 0:
+            return [self.mask, ':', text], []
+        elif self.pattern_id == 1:
+            return [text, '. The comment is', self.mask, '.'], []
+        else:
+            raise ValueError("No pattern implemented for id {}".format(self.pattern_id))
+
+    def verbalize(self, label) -> List[str]:
+        return XtremePVP.VERBALIZER[label]
 
 class AgnewsPVP(PVP):
     VERBALIZER = {
@@ -637,4 +656,5 @@ PVPS = {
     'record': RecordPVP,
     'ax-b': RtePVP,
     'ax-g': RtePVP,
+    'xtreme': XtremePVP,
 }
